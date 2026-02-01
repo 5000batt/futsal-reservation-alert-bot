@@ -35,7 +35,13 @@ def send_telegram_msg(message):
 
 def check_all_reservations():
     options = webdriver.ChromeOptions()
-    # options.add_argument('headless') 
+    
+    # --- GitHub Actions 환경을 위한 필수 옵션 추가 ---
+    options.add_argument('--headless') # 창 없이 실행
+    options.add_argument('--no-sandbox') # 보안 기능 해제 (리눅스 환경 필수)
+    options.add_argument('--disable-dev-shm-usage') # 공유 메모리 부족 방지
+    options.add_argument('--disable-gpu') # GPU 가속 비활성화
+    # ----------------------------------------------
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     
