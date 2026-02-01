@@ -2,8 +2,8 @@ name: Futsal Check Bot
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # 10분마다 실행
-  workflow_dispatch: # 수동으로 실행해볼 수 있는 버튼 생성
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,6 +15,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+
+      # 추가: 크롬 브라우저 설치 환경 확인
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Install dependencies
         run: |
