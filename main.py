@@ -1,5 +1,6 @@
 import time
-from datetime import datetime
+import os
+from datetime import datetime, timedelta, timezone
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -17,8 +18,8 @@ TARGET_PLACES = [
 # 공백 없이 붙여 쓴 타겟 시간 (정확히 이것만 찾습니다)
 TARGET_TIME_CLEAN = "08:00~10:00"
 
-TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
-TELEGRAM_CHAT_ID = "TELEGRAM_CHAT_ID"
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 # =================================================
 
 def send_telegram_msg(message):
@@ -32,6 +33,13 @@ def send_telegram_msg(message):
         requests.post(url, json=payload)
     except Exception as e:
         print(f"텔레그램 전송 실패: {e}")
+
+def get_now_kst():
+    """항상 정확한 한국 시간(KST)을 반환하는 함수"""
+    # UTC 기준 시간을 가져와서 KST(+9)로 변환
+    utc_now = datetime.now(timezone.utc)
+    kst_now = utc_now.astimezone(timezone(timedelta(hours=9)))
+    return kst_now
 
 def check_all_reservations():
     options = webdriver.ChromeOptions()
@@ -168,20 +176,14 @@ if __name__ == "__main__":
     # 1. 예약 확인 실행
     check_all_reservations()
     
-    # 2. [추가] 자정 안부 메시지 로직
-    # GitHub Actions 서버는 UTC 기준이므로 한국 시간(KST)으로 변환하여 체크합니다.
-    from datetime import timedelta
+    # 2. 자정 생존 신고 (KST 기준)
+    now_kst = get_now_kst()
     
-    now_utc = datetime.utcnow()
-    now_kst = now_utc + timedelta(hours=9) # UTC -> KST 변환
-    
-    # 00:00 ~ 00:15 사이에 실행될 때 한 번만 메시지 전송
-    # 10분 주기이므로 이 범위 안에 반드시 한 번 걸립니다.
-    if now_kst.hour == 0 and 0 <= now_kst.minute < 15:
-        report_msg = f"🌅 [생존 신고] {now_kst.strftime('%Y-%m-%d')} 자정입니다.\n봇이 정상적으로 작동 중이며 10분마다 감시 중입니다."
-        send_telegram_msg(report_msg)
+    # 10분 주기 실행이므로, 00:00 ~ 00:10 사이의 첫 실행 때 메시지 발송
+    if now_kst.hour == 0 and 0 <= now_kst.minute < 11:
+        msg = f"🌅 [생존 신고]\n현재 시간: {now_kst.strftime('%Y-%m-%d %H:%M:%S')}\n봇이 정상 작동 중입니다."
+        send_telegram_msg(msg)
 
     # 당장 잠깐 테스트
     send_telegram_msg("TEST")
-
 
