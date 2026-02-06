@@ -23,8 +23,6 @@ TARGET_TIME_CLEAN = "08:00~10:00"
 def send_telegram_msg(message):
     token = os.environ.get("TELEGRAM_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-    print(f"token: {token}")
-    print(f"chat_id: {chat_id}")
 
     """텔레그램으로 알림을 보내는 함수"""
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -43,13 +41,6 @@ def send_telegram_msg(message):
             print(f"📝 서버 응답: {response.text}") # 텔레그램이 왜 거절했는지 알려줍니다.
     except Exception as e:
         print(f"💥 텔레그램 전송 중 예외 발생: {e}")
-
-def get_now_kst():
-    """항상 정확한 한국 시간(KST)을 반환하는 함수"""
-    # UTC 기준 시간을 가져와서 KST(+9)로 변환
-    utc_now = datetime.now(timezone.utc)
-    kst_now = utc_now.astimezone(timezone(timedelta(hours=9)))
-    return kst_now
 
 def check_all_reservations():
     options = webdriver.ChromeOptions()
@@ -185,15 +176,3 @@ def check_all_reservations():
 if __name__ == "__main__":
     # 1. 예약 확인 실행
     check_all_reservations()
-    
-    # 2. 자정 생존 신고 (KST 기준)
-    now_kst = get_now_kst()
-    
-    # 10분 주기 실행이므로, 00:00 ~ 00:10 사이의 첫 실행 때 메시지 발송
-    if now_kst.hour == 0 and 0 <= now_kst.minute < 11:
-        msg = f"🌅 [생존 신고]\n현재 시간: {now_kst.strftime('%Y-%m-%d %H:%M:%S')}\n봇이 정상 작동 중입니다."
-        send_telegram_msg(msg)
-
-    # 당장 잠깐 테스트
-    send_telegram_msg("TEST")
-
