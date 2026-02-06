@@ -181,3 +181,7 @@ if __name__ == "__main__":
         report_msg = f"🌅 [생존 신고] {now_kst.strftime('%Y-%m-%d')} 자정입니다.\n봇이 정상적으로 작동 중이며 10분마다 감시 중입니다."
         send_telegram_msg(report_msg)
 
+    # 당장 잠깐 테스트
+    send_telegram_msg("TEST")
+
+
