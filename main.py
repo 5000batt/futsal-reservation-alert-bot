@@ -18,21 +18,31 @@ TARGET_PLACES = [
 # 공백 없이 붙여 쓴 타겟 시간 (정확히 이것만 찾습니다)
 TARGET_TIME_CLEAN = "08:00~10:00"
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 # =================================================
 
 def send_telegram_msg(message):
+    token = os.environ.get("TELEGRAM_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    print(f"token: {token}")
+    print(f"chat_id: {chat_id}")
+
     """텔레그램으로 알림을 보내는 함수"""
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
+        "chat_id": chat_id,
         "text": message
     }
+     
     try:
-        requests.post(url, json=payload)
+        response = requests.post(url, json=payload)
+        # 중요: 전송 결과 상세 로그 남기기
+        if response.status_code == 200:
+            print(f"✅ 텔레그램 메시지 전송 성공: {message[:10]}...")
+        else:
+            print(f"❌ 텔레그램 전송 실패! 상태코드: {response.status_code}")
+            print(f"📝 서버 응답: {response.text}") # 텔레그램이 왜 거절했는지 알려줍니다.
     except Exception as e:
-        print(f"텔레그램 전송 실패: {e}")
+        print(f"💥 텔레그램 전송 중 예외 발생: {e}")
 
 def get_now_kst():
     """항상 정확한 한국 시간(KST)을 반환하는 함수"""
