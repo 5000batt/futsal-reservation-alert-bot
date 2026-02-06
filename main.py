@@ -21,8 +21,8 @@ TARGET_TIME_CLEAN = "08:00~10:00"
 # =================================================
 
 def send_telegram_msg(message):
-    token = os.environ.get("TELEGRAM_TOKEN", "")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    token = os.environ.get("TELEGRAM_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     print(f"token: {token}")
     print(f"chat_id: {chat_id}")
 
@@ -32,7 +32,7 @@ def send_telegram_msg(message):
         "chat_id": chat_id,
         "text": message
     }
-     
+        
     try:
         response = requests.post(url, json=payload)
         # 중요: 전송 결과 상세 로그 남기기
