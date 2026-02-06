@@ -165,4 +165,19 @@ def check_all_reservations():
         # driver.quit()
 
 if __name__ == "__main__":
+    # 1. 예약 확인 실행
     check_all_reservations()
+    
+    # 2. [추가] 자정 안부 메시지 로직
+    # GitHub Actions 서버는 UTC 기준이므로 한국 시간(KST)으로 변환하여 체크합니다.
+    from datetime import timedelta
+    
+    now_utc = datetime.utcnow()
+    now_kst = now_utc + timedelta(hours=9) # UTC -> KST 변환
+    
+    # 00:00 ~ 00:15 사이에 실행될 때 한 번만 메시지 전송
+    # 10분 주기이므로 이 범위 안에 반드시 한 번 걸립니다.
+    if now_kst.hour == 0 and 0 <= now_kst.minute < 15:
+        report_msg = f"🌅 [생존 신고] {now_kst.strftime('%Y-%m-%d')} 자정입니다.\n봇이 정상적으로 작동 중이며 10분마다 감시 중입니다."
+        send_telegram_msg(report_msg)
+
